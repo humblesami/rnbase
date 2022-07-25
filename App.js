@@ -1,111 +1,106 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
 import React from 'react';
 import {
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
     StyleSheet,
     Text,
-    useColorScheme,
     View,
+    Button,
+    TouchableOpacity,
+    ScrollView,
+    Image,
 } from 'react-native';
+import DocumentPicker from 'react-native-document-picker';
 
-import {
-    Colors,
-    DebugInstructions,
-    Header,
-    LearnMoreLinks,
-    ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-const Section = ({ children, title }) => {
-    const isDarkMode = useColorScheme() === 'dark';
-    return (
-        <View style={styles.sectionContainer}>
-            <Text
-                style={[
-                    styles.sectionTitle,
-                    {
-                        color: isDarkMode ? Colors.white : Colors.black,
-                    },
-                ]}>
-                {title}
+export default class App extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            singleFile: {},
+        };
+    }
+
+    async selectOneFile() {
+        try {
+            const res = await DocumentPicker.pick({
+                type: [DocumentPicker.types.allFiles],
+            });
+            let file_details = {};
+            if(Array.isArray(res) && res.length){
+                file_details = res[0];
+            }
+            this.setState({ singleFile: file_details });
+        }
+        catch (err) {
+            //If user cancels document selection
+            if (DocumentPicker.isCancel(err)) {
+                alert('Canceled from single doc picker');
+            }
+            else {
+                alert('Unknown Error: ' + JSON.stringify(err));
+                //throw err;
+            }
+        }
+    }
+
+    getFileText(item) {
+        return (
+            <Text style={styles.text}>
+                File Name: {item.name ? item.name : ''}
+                {'\n'}
+                Type: {item.type ? item.type : ''}
+                {'\n'}
+                File Size: {item.size ? item.size : ''}
+                {'\n'}
+                URI: {item.uri ? item.uri : ''}
+                {'\n'}
             </Text>
-            <Text
-                style={[
-                    styles.sectionDescription,
-                    {
-                        color: isDarkMode ? Colors.light : Colors.dark,
-                    },
-                ]}>
-                {children}
-            </Text>
-        </View>
-    );
-};
-
-const App = () => {
-    const isDarkMode = useColorScheme() === 'dark';
-
-    const backgroundStyle = {
-        backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+        );
     };
 
-    return (
-        <SafeAreaView style={backgroundStyle}>
-            <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-            <ScrollView
-                contentInsetAdjustmentBehavior="automatic"
-                style={backgroundStyle}>
-                <Header />
-                <View
-                    style={{
-                        backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                    }}>
-                    <Section title="Step One">
-                        First of me, Edit <Text style={styles.highlight}>App.js</Text> to change this
-                        screen and then come back to see your edits.
-                    </Section>
-                    <Section title="See Your Changes">
-                        <ReloadInstructions />
-                    </Section>
-                    <Section title="Debug">
-                        <DebugInstructions />
-                    </Section>
-                    <Section title="Learn More">
-                        Read the docs to discover what to do next:
-                    </Section>
-                    <LearnMoreLinks />
-                </View>
-            </ScrollView>
-        </SafeAreaView>
-    );
-};
+    render() {
+        let obj_this = this;
+        return (
+            <View style={styles.container}>
+                <TouchableOpacity
+                    activeOpacity={0.9}
+                    style={styles.button}
+                    onPress={obj_this.selectOneFile.bind(this)}>
+                    <Text style={{ marginRight: 10, fontSize: 19, color: 'white' }}> Pick one file </Text>
+                    <Image
+                        source={{
+                            uri: 'https://img.icons8.com/offices/40/000000/attach.png',
+                        }}
+                        style={styles.imageIcon}
+                    />
+                </TouchableOpacity>
+                {obj_this.getFileText(obj_this.state.singleFile)}
+                <View style={{ backgroundColor: 'grey', height: 2, margin: 10 }} />
+            </View>
+        );
+    }
+}
 
 const styles = StyleSheet.create({
-    sectionContainer: {
-        marginTop: 32,
-        paddingHorizontal: 24,
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        padding: 16,
     },
-    sectionTitle: {
-        fontSize: 24,
-        fontWeight: '600',
+    text: {
+        backgroundColor: '#fff',
+        fontSize: 15,
+        marginTop: 16,
+        color: 'black',
     },
-    sectionDescription: {
-        marginTop: 8,
-        fontSize: 18,
-        fontWeight: '400',
+    button: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        backgroundColor: '#fd2ded',
+        padding: 5,
     },
-    highlight: {
-        fontWeight: '700',
+    imageIcon: {
+        height: 20,
+        width: 20,
+        resizeMode: 'stretch'
     },
 });
-
-export default App;
